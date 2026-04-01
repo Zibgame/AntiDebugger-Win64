@@ -1,0 +1,20 @@
+# Build
+build/
+
+# Object files
+*.o
+
+# Static libs
+*.a
+
+# Executables
+*.exe
+
+# Debug
+*.log
+
+# VSCode
+.vscode/
+
+# Windows
+Thumbs.db
