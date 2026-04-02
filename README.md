@@ -1,46 +1,46 @@
 # 🛡️ AntiDebugger-Win64
 
-Une petite librairie C/C++ pour détecter les débogueurs sous Windows ⚙️🪟
+A lightweight C/C++ library for detecting debuggers on Windows ⚙️🪟
 
 ---
 
-## ✨ Objectif du projet
+## ✨ Project Goal
 
-Ce projet a pour but de fournir une base simple pour comprendre et expérimenter les techniques de détection de debug sous Windows :
+This project provides a simple base to learn and experiment with debugger detection techniques on Windows:
 
-* 🧠 Détection basique de debugger
-* ⚡ Faible overhead
-* 🧩 Intégration rapide dans un projet C/C++
-* 🔍 Approche éducative (reverse engineering / sécurité)
+* 🧠 Basic debugger detection
+* ⚡ Low overhead design
+* 🧩 Easy integration into C/C++ projects
+* 🔍 Educational purpose (reverse engineering / security learning)
 
 ---
 
-## 🧩 Fonctionnalités
+## 🧩 Features
 
-✔ Détection via API Windows (`IsDebuggerPresent`)
-✔ Détection via PEB (anti-hook simple)
-✔ Détection de debugger distant
-✔ Thread de surveillance continue
-✔ TLS callback (détection avant `main()`)
+✔ Detection via Windows API (`IsDebuggerPresent`)
+✔ Detection via PEB (anti-hook technique)
+✔ Remote debugger detection
+✔ Continuous monitoring thread
+✔ TLS callback (early execution before `main()`)
 
 ---
 
 ## 📦 Installation
 
-Clone le projet :
+Clone the repository:
 
 ```bash
 git clone https://github.com/yourname/AntiDebugger-Win64.git
 cd AntiDebugger-Win64
 ```
 
-Ajoute les fichiers `.c/.cpp` à ton projet Visual Studio ou MinGW.
+Then add the `.c/.cpp` files to your Visual Studio or MinGW project.
 
 ---
 
-## 🚀 Utilisation rapide
+## 🚀 Quick Start
 
-### 1️⃣ Inclure la librairie
+### 1️⃣ Include the library
 
 ```cpp
 #include "antidebug.h"
@@ -48,7 +48,7 @@ Ajoute les fichiers `.c/.cpp` à ton projet Visual Studio ou MinGW.
 
 ---
 
-### 2️⃣ Initialiser le système anti-debug
+### 2️⃣ Initialize the anti-debug system
 
 ```cpp
 int main()
@@ -65,67 +65,67 @@ int main()
 
 ---
 
-## 🧪 API disponible
+## 🧪 API Reference
 
-### 🔧 Initialisation
+### 🔧 Initialization
 
 ```cpp
 bool antidebug_init(void);
 ```
 
-➡ Lance les vérifications + démarre le thread de monitoring
+➡ Starts all checks and launches the monitoring thread
 
 ---
 
-### 🔍 Vérification manuelle
+### 🔍 Manual check
 
 ```cpp
 bool antidebug_detected(void);
 ```
 
-➡ Retourne `true` si un debugger a été détecté
+➡ Returns `true` if a debugger was detected
 
 ---
 
-### 💀 Quitter proprement
+### 💀 Exit process
 
 ```cpp
 void antidebug_exit(void);
 ```
 
-➡ Termine immédiatement le process
+➡ Immediately terminates the current process
 
 ---
 
-## 🧠 Mécanismes internes
+## 🧠 Internal Mechanisms
 
-### 🧪 Checks utilisés
+### 🧪 Detection methods
 
-* `IsDebuggerPresent()` (API Windows)
-* Lecture du PEB (BeingDebugged + NtGlobalFlag)
+* `IsDebuggerPresent()` (Windows API)
+* PEB structure inspection (BeingDebugged + NtGlobalFlag)
 * `CheckRemoteDebuggerPresent()`
 
 ---
 
-### 🧵 Thread de surveillance
+### 🧵 Monitoring thread
 
-Un thread tourne en boucle :
+A background thread continuously:
 
-* vérifie les signaux de debug
-* ajoute un délai aléatoire pour éviter les patterns
-* kill le process si nécessaire
+* checks debugger signals
+* applies random sleep delays to avoid patterns
+* terminates process if a debugger is detected
 
 ---
 
 ### 🧬 TLS Callback
 
-Le check est exécuté **avant `main()`** :
+Runs checks **before `main()` execution**:
 
-➡ Permet de bloquer très tôt l’exécution si debug détecté
+➡ Allows early termination if a debugger is attached
 
 ---
 
-## 📁 Architecture suggérée
+## 📁 Suggested Architecture
 
 ```
 /antidebug
@@ -142,32 +142,32 @@ Le check est exécuté **avant `main()`** :
 
 ## ⚠️ Disclaimer
 
-Ce projet est fourni à des fins :
+This project is provided for:
 
-* 📚 éducatives
-* 🔬 recherche sécurité
+* 📚 educational purposes
+* 🔬 security research learning
 
-❗ Il ne garantit pas une protection complète contre le reverse engineering ou le debugging avancé.
-
----
-
-## 🎯 Améliorations possibles
-
-* 🧬 Anti-tampering (checksum du code)
-* 🧠 Détection VM (VirtualBox / VMware)
-* ⏱ Timing checks (rdtsc)
-* 🔒 Obfuscation des fonctions critiques
-* 🧪 Détection breakpoints logiciels (0xCC)
+❗ It does NOT guarantee protection against advanced reverse engineering or debugging techniques.
 
 ---
 
-## 📄 Licence
+## 🎯 Possible Improvements
+
+* 🧬 Anti-tampering (code checksum validation)
+* 🧠 VM detection (VirtualBox / VMware)
+* ⏱ Timing-based checks (rdtsc)
+* 🔒 Function obfuscation
+* 🧪 Software breakpoint detection (0xCC)
+
+---
+
+## 📄 License
 
 MIT License 📜
 
 ---
 
-## 🚀 Exemple complet
+## 🚀 Full Example
 
 ```cpp
 #include "antidebug.h"
