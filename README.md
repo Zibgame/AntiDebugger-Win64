@@ -190,3 +190,147 @@ int main()
 ---
 
 🛡️ *Built for learning low-level Windows security concepts*
+
+---
+
+## 📘 How to use `libantidebug.a` in your project
+
+### 📦 1. Project structure example
+
+```
+/project
+ ├── main.cpp
+ ├── include/antidebug.h
+ ├── build/libantidebug.a
+```
+
+---
+
+### ⚙️ 2. Compilation (MinGW / g++)
+
+Make sure you link the static library:
+
+```bash
+g++ main.cpp -Iinclude -Lbuild -lantidebug -o app.exe
+```
+
+---
+
+### 🧠 3. Example usage
+
+```cpp
+#include "antidebug.h"
+#include <iostream>
+
+int main()
+{
+    if (!antidebug_init())
+    {
+        std::cout << "Failed to initialize anti-debug system" << std::endl;
+        return 1;
+    }
+
+    if (antidebug_detected())
+    {
+        antidebug_exit();
+    }
+
+    std::cout << "App running normally" << std::endl;
+    return 0;
+}
+```
+
+---
+
+### 🧩 4. Important notes
+
+* Ensure `libantidebug.a` matches your compiler (MinGW/MSVC mismatch will break linking)
+* Include path must contain `antidebug.h`
+* Library path must point to `/build`
+
+---
+
+### 🚀 5. Recommended (clean setup)
+
+For larger projects:
+
+```
+/project
+ ├── external/antidebug/
+ │    ├── include/
+ │    ├── build/
+ ├── src/
+ ├── main.cpp
+```
+
+Compile:
+
+```bash
+g++ main.cpp -Iexternal/antidebug/include -Lexternal/antidebug/build -lantidebug
+```
+
+---
+
+### 📊 Integration level
+
+✔ Simple drop-in static library
+✔ No runtime dependencies
+✔ Cross-project reusable module
+
+---
+
+---
+
+## 🏗️ Build Output
+
+After compilation, the project produces a static library:
+
+```
+build/libantidebug.a
+```
+
+This library can be linked directly into any C/C++ project:
+
+```bash
+-lantidebug
+```
+
+or linked manually depending on your toolchain.
+
+Example (MinGW):
+
+```bash
+g++ main.cpp -Lbuild -lantidebug
+```
+
+---
+
+## 📊 Project Status
+
+This project is under active development 🛠️
+
+### Current state:
+
+* ✔ Core anti-debug engine implemented
+* ✔ Monitoring thread system
+* ✔ TLS early execution layer
+* 🔄 Ongoing improvements and extensions
+
+### Design level:
+
+➡ Modular architecture ready for extension
+➡ Suitable for learning, experimentation, and integration into C/C++ projects
+➡ Built with performance and simplicity in mind
+
+---
+
+## 🚀 Professional positioning
+
+The goal of this project is to evolve into a **clean, modular and reusable security utility library**:
+
+* clean separation of detection modules
+* easy integration into larger software
+* predictable and minimal runtime overhead
+* maintainable architecture aligned with low-level Windows internals
+
+---
