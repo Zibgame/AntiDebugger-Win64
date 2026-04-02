@@ -1,6 +1,6 @@
 # 🛡️ AntiDebugger-Win64
 
-Lightweight and modular C/C++ library for debugger detection on Windows.
+Lightweight and modular C/C++ library for debugger detection **and active response** on Windows.
 
 ---
 
@@ -13,6 +13,7 @@ The project is designed to be:
 * 🧩 **Composable**: each detection technique is isolated and extendable
 * 🧠 **Low-level oriented**: direct interaction with Windows internals (PEB, TLS, threads)
 * ⚙️ **Production-friendly**: minimal overhead, simple API, easy linking
+* ⚔️ **Active defense capable**: can react by killing debuggers and notifying the user
 
 Typical use cases:
 
@@ -75,6 +76,7 @@ bool antidebug_init(void);
 Initializes the system:
 
 * runs early detection
+* enables required privileges (SeDebugPrivilege)
 * starts monitoring thread
 
 ---
@@ -99,13 +101,46 @@ Immediately terminates the current process.
 
 ---
 
-### 🧠 Internal (used by runtime / TLS)
+### ⚔️ Active response
 
 ```c
-void antidebug_set_detected(void);
+int kill_debugger(void);
 ```
 
-Sets internal detection flag (used by monitoring thread and TLS callback).
+Attempts to terminate known debugger processes:
+
+* x64dbg
+* x32dbg
+* IDA (32/64)
+* OllyDbg
+
+Requires sufficient privileges to succeed.
+
+---
+
+### 🔫 Low-level helpers
+
+```c
+int kill_process_by_name(const std::string &target);
+int kill_process_by_pid(DWORD pid);
+```
+
+Used internally to terminate processes.
+
+---
+
+### 🔔 Notification
+
+```c
+void show_notification(std::string title, std::string info);
+```
+
+Displays a Windows notification when a debugger is detected.
+
+⚠️ Note:
+
+* Uses legacy Shell_NotifyIcon API
+* Behavior may vary depending on Windows version
 
 ---
 
@@ -120,6 +155,12 @@ src/
  │    ├── api.cpp
  │    ├── peb.cpp
  │    └── remote.cpp
+ │
+ ├── process/
+ │    └── process.cpp
+ │
+ ├── notification/
+ │    └── notification.cpp
  │
  ├── runtime/
  │    └── monitor.cpp
@@ -139,36 +180,60 @@ build/
 
 ---
 
-## 🧠 Detection Strategy
+## 🧠 Detection & Response Strategy
 
-The library implements a layered detection model:
+The library implements a layered **detection + reaction model**:
 
-* ⚡ **Static checks (early stage)**
+### ⚡ Early stage (TLS callback)
 
-  * Executed via TLS callback before `main()`
-  * Detects debuggers attached at process startup
+* Executed before `main()`
+* Detects debuggers attached at process startup
+* Sets detection flag (no heavy action here)
 
-* 🔎 **Synchronous checks (init phase)**
+---
 
-  * PEB inspection (BeingDebugged, NtGlobalFlag)
-  * WinAPI checks (`IsDebuggerPresent`)
-  * Remote debugger detection
+### 🔎 Init phase
 
-* 🔁 **Asynchronous monitoring (runtime)**
+* PEB inspection (BeingDebugged, NtGlobalFlag)
+* WinAPI checks (`IsDebuggerPresent`)
+* Remote debugger detection
 
-  * Background thread continuously re-checks environment
-  * Non-deterministic timing to reduce pattern detection
+---
 
-This approach ensures coverage across:
+### 🔁 Runtime monitoring
 
-* 🚀 process startup
-* ⏱️ runtime attachment
-* 🌐 external debugger interaction
+* Background thread continuously checks environment
+* Non-deterministic timing
+
+---
+
+### ⚔️ Active response (NEW)
+
+When a debugger is detected:
+
+1. Detection flag is set
+2. Privileges are elevated (SeDebugPrivilege)
+3. Known debugger processes are terminated
+4. Notification is displayed
+5. Application can terminate itself
+
+---
+
+## ⚠️ Limitations
+
+* Requires sufficient privileges to kill external processes
+* Some debuggers may resist termination
+* Windows notification system is not fully reliable
+* Not resistant to advanced anti-anti-debug techniques
 
 ---
 
 ## ⚠️ Disclaimer
 
-This project is intended for defensive security, reverse engineering practice, and low-level Windows experimentation.
+This project is intended for:
 
-It does not guarantee resistance against advanced debugging techniques.
+* defensive security
+* reverse engineering practice
+* low-level Windows experimentation
+
+It does **not guarantee protection** against advanced analysis tools or skilled reverse engineers.
