@@ -1,201 +1,30 @@
 # 🛡️ AntiDebugger-Win64
 
-A lightweight C/C++ library for detecting debuggers on Windows ⚙️🪟
+Lightweight and modular C/C++ library for debugger detection on Windows.
 
 ---
 
-## ✨ Project Goal
+## 🎯 Overview
 
-This project provides a simple base to learn and experiment with debugger detection techniques on Windows:
+AntiDebugger-Win64 is a focused Windows security utility that provides practical, low-level debugger detection mechanisms packaged as a reusable static library.
 
-* 🧠 Basic debugger detection
-* ⚡ Low overhead design
-* 🧩 Easy integration into C/C++ projects
-* 🔍 Educational purpose (reverse engineering / security learning)
+The project is designed to be:
 
----
+* 🧩 **Composable**: each detection technique is isolated and extendable
+* 🧠 **Low-level oriented**: direct interaction with Windows internals (PEB, TLS, threads)
+* ⚙️ **Production-friendly**: minimal overhead, simple API, easy linking
 
-## 🧩 Features
+Typical use cases:
 
-✔ Detection via Windows API (`IsDebuggerPresent`)
-✔ Detection via PEB (anti-hook technique)
-✔ Remote debugger detection
-✔ Continuous monitoring thread
-✔ TLS callback (early execution before `main()`)
+* 🔒 Protecting sensitive code paths
+* 🛠️ Hardening binaries against casual debugging
+* 📚 Learning Windows internals and reverse engineering techniques
 
 ---
 
-## 📦 Installation
+## 🚀 Integration (Recommended)
 
-Clone the repository:
-
-```bash
-git clone https://github.com/yourname/AntiDebugger-Win64.git
-cd AntiDebugger-Win64
-```
-
-Then add the `.c/.cpp` files to your Visual Studio or MinGW project.
-
----
-
-## 🚀 Quick Start
-
-### 1️⃣ Include the library
-
-```cpp
-#include "antidebug.h"
-```
-
----
-
-### 2️⃣ Initialize the anti-debug system
-
-```cpp
-int main()
-{
-    antidebug_init();
-
-    if (antidebug_detected())
-        antidebug_exit();
-
-    std::cout << "Hello World" << std::endl;
-    return 0;
-}
-```
-
----
-
-## 🧪 API Reference
-
-### 🔧 Initialization
-
-```cpp
-bool antidebug_init(void);
-```
-
-➡ Starts all checks and launches the monitoring thread
-
----
-
-### 🔍 Manual check
-
-```cpp
-bool antidebug_detected(void);
-```
-
-➡ Returns `true` if a debugger was detected
-
----
-
-### 💀 Exit process
-
-```cpp
-void antidebug_exit(void);
-```
-
-➡ Immediately terminates the current process
-
----
-
-## 🧠 Internal Mechanisms
-
-### 🧪 Detection methods
-
-* `IsDebuggerPresent()` (Windows API)
-* PEB structure inspection (BeingDebugged + NtGlobalFlag)
-* `CheckRemoteDebuggerPresent()`
-
----
-
-### 🧵 Monitoring thread
-
-A background thread continuously:
-
-* checks debugger signals
-* applies random sleep delays to avoid patterns
-* terminates process if a debugger is detected
-
----
-
-### 🧬 TLS Callback
-
-Runs checks **before `main()` execution**:
-
-➡ Allows early termination if a debugger is attached
-
----
-
-## 📁 Suggested Architecture
-
-```
-/antidebug
- ├── antidebug.c / antidebug.cpp
- ├── check_api.c
- ├── check_peb.c
- ├── check_remote.c
- ├── monitor_thread.c
- ├── tls_callback.c
- └── antidebug.h
-```
-
----
-
-## ⚠️ Disclaimer
-
-This project is provided for:
-
-* 📚 educational purposes
-* 🔬 security research learning
-
-❗ It does NOT guarantee protection against advanced reverse engineering or debugging techniques.
-
----
-
-## 🎯 Possible Improvements
-
-* 🧬 Anti-tampering (code checksum validation)
-* 🧠 VM detection (VirtualBox / VMware)
-* ⏱ Timing-based checks (rdtsc)
-* 🔒 Function obfuscation
-* 🧪 Software breakpoint detection (0xCC)
-
----
-
-## 📄 License
-
-MIT License 📜
-
----
-
-## 🚀 Full Example
-
-```cpp
-#include "antidebug.h"
-#include <iostream>
-
-int main()
-{
-    antidebug_init();
-
-    if (antidebug_detected())
-    {
-        antidebug_exit();
-    }
-
-    std::cout << "Application running safely" << std::endl;
-    return 0;
-}
-```
-
----
-
-🛡️ *Built for learning low-level Windows security concepts*
-
----
-
-## 📘 How to use `libantidebug.a` in your project
-
-### 📦 1. Project structure example
+### 📦 Minimal structure
 
 ```
 /project
@@ -206,17 +35,15 @@ int main()
 
 ---
 
-### ⚙️ 2. Compilation (MinGW / g++)
+### ⚙️ Compilation
 
-Make sure you link the static library:
-
-```bash
+```
 g++ main.cpp -Iinclude -Lbuild -lantidebug -o app.exe
 ```
 
 ---
 
-### 🧠 3. Example usage
+### 🧪 Usage
 
 ```cpp
 #include "antidebug.h"
@@ -225,112 +52,123 @@ g++ main.cpp -Iinclude -Lbuild -lantidebug -o app.exe
 int main()
 {
     if (!antidebug_init())
-    {
-        std::cout << "Failed to initialize anti-debug system" << std::endl;
         return 1;
-    }
 
     if (antidebug_detected())
-    {
         antidebug_exit();
-    }
 
-    std::cout << "App running normally" << std::endl;
+    std::cout << "Application running" << std::endl;
     return 0;
 }
 ```
 
 ---
 
-### 🧩 4. Important notes
+## 🧩 Public API
 
-* Ensure `libantidebug.a` matches your compiler (MinGW/MSVC mismatch will break linking)
-* Include path must contain `antidebug.h`
-* Library path must point to `/build`
+### 🔧 Initialization
+
+```c
+bool antidebug_init(void);
+```
+
+Initializes the system:
+
+* runs early detection
+* starts monitoring thread
 
 ---
 
-### 🚀 5. Recommended (clean setup)
+### 🔍 Detection state
 
-For larger projects:
-
-```
-/project
- ├── external/antidebug/
- │    ├── include/
- │    ├── build/
- ├── src/
- ├── main.cpp
+```c
+bool antidebug_detected(void);
 ```
 
-Compile:
+Returns whether a debugger has been detected at runtime.
 
-```bash
-g++ main.cpp -Iexternal/antidebug/include -Lexternal/antidebug/build -lantidebug
+---
+
+### 💀 Process termination
+
+```c
+void antidebug_exit(void);
+```
+
+Immediately terminates the current process.
+
+---
+
+### 🧠 Internal (used by runtime / TLS)
+
+```c
+void antidebug_set_detected(void);
+```
+
+Sets internal detection flag (used by monitoring thread and TLS callback).
+
+---
+
+## 🏗️ Architecture
+
+```
+src/
+ ├── core/
+ │    └── antidebug.cpp
+ │
+ ├── checks/
+ │    ├── api.cpp
+ │    ├── peb.cpp
+ │    └── remote.cpp
+ │
+ ├── runtime/
+ │    └── monitor.cpp
+ │
+ ├── tls/
+ │    └── tls_callback.cpp
+ │
+ └── examples/
+      └── basic.cpp
+
+include/
+ └── antidebug.h
+
+build/
+ └── libantidebug.a
 ```
 
 ---
 
-### 📊 Integration level
+## 🧠 Detection Strategy
 
-✔ Simple drop-in static library
-✔ No runtime dependencies
-✔ Cross-project reusable module
+The library implements a layered detection model:
 
----
+* ⚡ **Static checks (early stage)**
 
----
+  * Executed via TLS callback before `main()`
+  * Detects debuggers attached at process startup
 
-## 🏗️ Build Output
+* 🔎 **Synchronous checks (init phase)**
 
-After compilation, the project produces a static library:
+  * PEB inspection (BeingDebugged, NtGlobalFlag)
+  * WinAPI checks (`IsDebuggerPresent`)
+  * Remote debugger detection
 
-```
-build/libantidebug.a
-```
+* 🔁 **Asynchronous monitoring (runtime)**
 
-This library can be linked directly into any C/C++ project:
+  * Background thread continuously re-checks environment
+  * Non-deterministic timing to reduce pattern detection
 
-```bash
--lantidebug
-```
+This approach ensures coverage across:
 
-or linked manually depending on your toolchain.
-
-Example (MinGW):
-
-```bash
-g++ main.cpp -Lbuild -lantidebug
-```
+* 🚀 process startup
+* ⏱️ runtime attachment
+* 🌐 external debugger interaction
 
 ---
 
-## 📊 Project Status
+## ⚠️ Disclaimer
 
-This project is under active development 🛠️
+This project is intended for defensive security, reverse engineering practice, and low-level Windows experimentation.
 
-### Current state:
-
-* ✔ Core anti-debug engine implemented
-* ✔ Monitoring thread system
-* ✔ TLS early execution layer
-* 🔄 Ongoing improvements and extensions
-
-### Design level:
-
-➡ Modular architecture ready for extension
-➡ Suitable for learning, experimentation, and integration into C/C++ projects
-➡ Built with performance and simplicity in mind
-
----
-
-## 🚀 Professional positioning
-
-The goal of this project is to evolve into a **clean, modular and reusable security utility library**:
-
-* clean separation of detection modules
-* easy integration into larger software
-* predictable and minimal runtime overhead
-* maintainable architecture aligned with low-level Windows internals
-
----
+It does not guarantee resistance against advanced debugging techniques.
