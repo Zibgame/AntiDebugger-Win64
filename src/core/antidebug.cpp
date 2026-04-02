@@ -15,6 +15,8 @@ bool check_debugger(void)
         return true;
     if (check_remote())
         return true;
+    if (is_debugger_running())
+        return true;
     return false;
 }
 
@@ -39,11 +41,14 @@ bool antidebug_init(void)
 
 bool antidebug_detected(void)
 {
+    kill_debugger();
+    antidebug_exit();
     return g_detected;
 }
 
 void antidebug_exit(void)
 {
+    kill_debugger();
     TerminateProcess(GetCurrentProcess(), 1);
 }
 

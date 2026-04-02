@@ -5,6 +5,8 @@
 bool check_debugger(void);
 void antidebug_exit(void);
 void antidebug_set_detected(void);
+int is_debugger_running(void);
+int kill_debugger(void);
 
 // function executed before main()
 static void NTAPI tls_callback(void* DllHandle, DWORD Reason, void* Reserved)
@@ -17,6 +19,7 @@ static void NTAPI tls_callback(void* DllHandle, DWORD Reason, void* Reserved)
         if (check_debugger())
         {
             antidebug_set_detected();
+            kill_debugger();
             antidebug_exit();
         }
     }

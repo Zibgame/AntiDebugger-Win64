@@ -3,7 +3,6 @@
 
 int main()
 {
-    //ajout du anti debug quand jaurais fini
     antidebug_init();
 
     if (antidebug_detected())
@@ -11,5 +10,9 @@ int main()
 
     std::cout << "Hello World" << std::endl;
 
+    while (true)
+    {
+        Sleep(1000);
+    }
     return 0;
 }
